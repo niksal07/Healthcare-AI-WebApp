@@ -1,0 +1,43 @@
+name: "OWASP security testing"
+
+on:
+    push:
+        branches:
+            main
+
+jobs:
+    on-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v3
+
+            - name: setup python
+              uses: actions/setup-python@v5
+              with:
+                python-version: 3.10
+            
+            - name: Install Dependencies
+              run: |
+                python3 -m venv venv
+                source venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+
+            - name: Run flask app in background
+              run: |
+                source venc/bin/activate
+                nohup python app.py &
+                sleep 5            
+
+            - name: Pull docker image for owasp
+              run: docker pull ghcr.io/zaproxy/zap-baseline:latest
+
+            - name: Run security testing on docker using owasp
+              run: docker run -v $(pwd):/zap/wrk   ghcr.io/zaproxy/zaproxy:latest zap-baseline.py   -t  https://c7b0aa10de21.ngrok-free.app   -r zap-report.html
+              
+            - name: Upload ZAP report
+              uses: actions/upload-artifact@v4
+              with:
+                name: zap-security-report
+                path: zap-report.html
