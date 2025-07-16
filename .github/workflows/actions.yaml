@@ -26,7 +26,7 @@ jobs:
 
             - name: Run flask app in background
               run: |
-                source venc/bin/activate
+                source venv/bin/activate
                 nohup python app.py &
                 sleep 5            
 
